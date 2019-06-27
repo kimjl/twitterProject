@@ -19,6 +19,7 @@ client = pymongo.MongoClient('localhost', 27017)
 db = client['tradewar']
 collection = db['Tweets']
 data = pd.DataFrame(list(collection.find()))
+df = pd.DataFrame({'date':data['created_at'].dt.date.unique()})
 
 #Set up our routes and render our html
 @app.route('/')
@@ -45,8 +46,8 @@ def tradewar():
 def displayLineData():
     #Set up our data to display as a line using matplotlib
     img = io.BytesIO()
-    data = pd.DataFrame(list(collection.find()))
-    df = pd.DataFrame({'date':data['created_at'].dt.date.unique()})
+    # data = pd.DataFrame(list(collection.find()))
+    # df = pd.DataFrame({'date':data['created_at'].dt.date.unique()})
     y_axis = data['created_at'].dt.date.value_counts()
 
     #Creating parameters for our line plot and labeling x and y axis
@@ -72,8 +73,8 @@ def displayLineData():
 def displayLineFill():
     #Set up our data to display as a line using matplotlib
     img = io.BytesIO()
-    data = pd.DataFrame(list(collection.find()))
-    df = pd.DataFrame({'date':data['created_at'].dt.date.unique()})
+    # data = pd.DataFrame(list(collection.find()))
+    # df = pd.DataFrame({'date':data['created_at'].dt.date.unique()})
 
     #Creating parameters to display data as line
     uniques = data.drop_duplicates('text')
@@ -88,7 +89,7 @@ def displayLineFill():
     organics = organics.set_index('created_at',drop=False)
     organics.index = organics.index.tz_localize('UTC').tz_convert('EST')
 
-    ts_hist = organics['created_at'].resample('60t').count()
+    ts_hist = organics['created_at'].resample('W').count()
     # Visualization of our tweets over a period of time
     plt.style.use
     x_date = ts_hist.index
@@ -98,7 +99,7 @@ def displayLineFill():
     ax.fill_between(x_date, zero_line, ts_hist.values, facecolor='blue', alpha=0.5)
     # Format plot
     plt.setp(ax.get_xticklabels(), fontsize=8, family='sans-serif', rotation=45)
-    plt.setp(ax.get_yticklabels(), fontsize=10, family='sans-serif')
+    plt.setp(ax.get_yticklabels(), fontsize=9, family='sans-serif')
     plt.xlabel('Date',fontsize=18)
     plt.ylabel('Number of Tweets',fontsize=18)
 
