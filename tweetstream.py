@@ -3,10 +3,10 @@ import sys
 import pymongo
 
 # Authentication Credentials
-consumer_key = 'Secret Key'
-consumer_secret = 'Secret secret'
-access_token = 'Secret Token'
-access_token_secret = 'Secret Acess'
+consumer_key = 'YOURKEY'
+consumer_secret = 'YOURSECRET'
+access_token = 'YOURTOKEN'
+access_token_secret = 'YOURTOKENSECRET'
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)

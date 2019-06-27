@@ -23,7 +23,7 @@ data = pd.DataFrame(list(collection.find()))
 #Set up our routes and render our html
 @app.route('/')
 def homepage():
-    return render_template('index.html')
+    return render_template('home.html')
 
 @app.route('/about')
 def about():
@@ -37,7 +37,10 @@ def home():
 def contact():
     return render_template('contact.html')
 
-#
+@app.route('/tradewar')
+def tradewar():
+    return render_template('tradewar.html')
+
 @app.route('/displayline')
 def displayLineData():
     #Set up our data to display as a line using matplotlib
@@ -46,21 +49,24 @@ def displayLineData():
     df = pd.DataFrame({'date':data['created_at'].dt.date.unique()})
     y_axis = data['created_at'].dt.date.value_counts()
 
-    #Creating parameters for our line plot
+    #Creating parameters for our line plot and labeling x and y axis
     fig, ax = plt.subplots()
-    ax.tick_params(axis='x', labelsize=8)
+    ax.tick_params(axis='x', labelsize=10)
     ax.tick_params(axis='y', labelsize=10)
     ax.set_xlabel('Dates', fontsize=15)
     ax.set_ylabel('Number of tweets' , fontsize=15)
     ax.set_title('Number of Tweets Per Day with #tradewar', fontsize=15, fontweight='bold')
 
     y_axis.plot(ax=ax, kind='line', color='red')
+    plt.setp(ax.get_xticklabels(), fontsize=8, family='sans-serif', rotation=45)
+    plt.setp(ax.get_yticklabels(), fontsize=10, family='sans-serif')
 
     plt.savefig(img, format='png')
     img.seek(0)
     plot_url = base64.b64encode(img.getvalue()).decode()
 
-    return '<img src="data:image/png;base64,{}">'.format(plot_url)
+    # return '<img src="data:image/png;base64,{}">'.format(plot_url)
+    return render_template('displayline.html', plot_url=plot_url)
 
 @app.route('/displayfill')
 def displayLineFill():
@@ -91,16 +97,17 @@ def displayLineFill():
     fig, ax = plt.subplots()
     ax.fill_between(x_date, zero_line, ts_hist.values, facecolor='blue', alpha=0.5)
     # Format plot
-    plt.setp(ax.get_xticklabels(),fontsize=8,family='sans-serif')
-    plt.setp(ax.get_yticklabels(),fontsize=15,family='sans-serif')
-    plt.xlabel('Date',fontsize=25)
-    plt.ylabel('Counts',fontsize=25)
+    plt.setp(ax.get_xticklabels(), fontsize=8, family='sans-serif', rotation=45)
+    plt.setp(ax.get_yticklabels(), fontsize=10, family='sans-serif')
+    plt.xlabel('Date',fontsize=18)
+    plt.ylabel('Number of Tweets',fontsize=18)
 
     plt.savefig(img, format='png')
     img.seek(0)
     plot_url = base64.b64encode(img.getvalue()).decode()
 
-    return '<img src="data:image/png;base64,{}">'.format(plot_url)
+    # return '<img src="data:image/png;base64,{}">'.format(plot_url)
+    return render_template('displayfill.html', plot_url=plot_url)
 
 
 @app.route('/sentanalysis')
