@@ -12,6 +12,7 @@ from pandas import DataFrame, Series
 from sklearn.decomposition import NMF, LatentDirichletAllocation
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from line_graph import clean_tweet, analyze_sentiment
+# from line_graph import sent_analysis, clean_tweet, analyze_sentiment
 import timeit
 
 app = Flask(__name__)
@@ -112,23 +113,77 @@ def displayLineFill():
     return render_template('displayfill.html', plot_url=plot_url)
 
 
+# @app.route('/sentanalysis')
+# def sentAnalysisDisplay():
+#     #fix naming convention
+#     # pos = sent_analysis()[0]
+#     # neu = sent_analysis()[1]
+#     # neg = sent_analysis()[2]
+#
+#     # this is probably slowing me down. calling on analyze sentiment for every tweet we have
+#     result = []
+#     for tweet in data['text']:
+#         result.append(analyze_sentiment(tweet))
+#     data['SA'] = result
+#     data['SA'] = data['text'].apply(lambda tweet: analyze_sentiment)
+#
+#     # data['SA'] = np.array([analyze_sentiment(tweet) for tweet in data['text'] ])
+#
+#     pos_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] > 0]
+#     neu_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] == 0]
+#     neg_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] < 0]
+#
+#     pos = len(pos_tweets)* 100/ len(data['text'])
+#     neu = len(neu_tweets)* 100/ len(data['text'])
+#     neg = len(neg_tweets)* 100/ len(data['text'])
+#
+#     #call once instead of 3 times
+#     # pos, neu, neg = sent_analysis()
+#
+#     return render_template('sentanalysis.html', pos=pos, neu=neu, neg=neg)
+
 @app.route('/sentanalysis')
 def sentAnalysisDisplay():
-    result = []
-    for tweet in data['text']:
-        result.append(analyze_sentiment(tweet))
-    data['SA'] = result
+    #fix naming convention
+    # pos = sent_analysis()[0]
+    # neu = sent_analysis()[1]
+    # neg = sent_analysis()[2]
 
-    pos_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] > 0]
-    neu_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] == 0]
-    neg_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] < 0]
+    # this is probably slowing me down. calling on analyze sentiment for every tweet we have
+    data['SA'] = data['text'].apply(analyze_sentiment)
 
-    pos = len(pos_tweets)* 100/ len(data['text'])
-    neu = len(neu_tweets)* 100/ len(data['text'])
-    neg = len(neg_tweets)* 100/ len(data['text'])
+    n = data.shape[0]
+    pos_frac = (data['SA'] > 0).sum() * 100 / n
+    neu_frac = (data['SA'] == 0).sum() * 100 / n
+    neg_frac = (data['SA'] < 0).sum() * 100 / n
 
-    return render_template('sentanalysis.html', pos=pos, neu=neu, neg=neg)
+    #call once instead of 3 times
+    # pos, neu, neg = sent_analysis()
 
+    return render_template('sentanalysis.html', pos=pos_frac, neu=neu_frac, neg=neg_frac)
+
+
+
+# def displayTopics(model, feature_names, no_top_words):
+#     for topic_idx, topic in enumerate(model.components_):
+#         print("Topic %d:" % (topic_idx))
+#         print(" ".join([feature_names[i]
+#                         for i in topic.argsort()[:-no_top_words - 1:-1]]))
+#
+# @app.route('/displaytopics')
+# def displayLDA():
+#     tweets = data.text
+#     no_features = 1000
+#     no_topics = 10
+#     no_top_words = 10
+#     tf_vectorizer = CountVectorizer(max_df=0.95, min_df=2, max_features=no_features, stop_words='english')
+#     tf = tf_vectorizer.fit_transform(tweets)
+#     tf_feature_names = tf_vectorizer.get_feature_names()
+#     lda = LatentDirichletAllocation(n_topics=no_topics, max_iter=5, learning_method='online', learning_offset=50.,
+#                                 random_state=0).fit(tf)
+#     topics = displayTopics(lda, tf_feature_names, no_top_words)
+#
+#     return render_template('displaytopics.html', topics=topics)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

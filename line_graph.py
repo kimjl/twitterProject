@@ -9,7 +9,7 @@ import pandas as pd
 client = pymongo.MongoClient('localhost', 27017)
 db = client['tradewar']
 collection = db['Tweets']
-data = pd.DataFrame(list(collection.find()))
+# data = pd.DataFrame(list(collection.find()))
 
 # Clean our tweets and perform sentiment analysis
 def clean_tweet(tweet):
@@ -29,3 +29,16 @@ def analyze_sentiment(tweet):
         return 0
     else:
         return -1
+
+# def sent_analysis():
+#     data['SA'] = np.array([analyze_sentiment(tweet) for tweet in data['text'] ])
+#
+#     pos_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] > 0]
+#     neu_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] == 0]
+#     neg_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] < 0]
+#
+#     pos = len(pos_tweets)* 100/ len(data['text'])
+#     neu = len(neu_tweets)* 100/ len(data['text'])
+#     neg = len(neg_tweets)* 100/ len(data['text'])
+#
+#     return pos, neu, neg
