@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "chart.js": "^2.8.0",
     "flask": "^0.2.10"
   },
   "devDependencies": {},

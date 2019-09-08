@@ -14,6 +14,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from line_graph import clean_tweet, analyze_sentiment
 # from line_graph import sent_analysis, clean_tweet, analyze_sentiment
 import timeit
+import seaborn as sns
 
 app = Flask(__name__)
 
@@ -22,6 +23,7 @@ db = client['tradewar']
 collection = db['Tweets']
 data = pd.DataFrame(list(collection.find()))
 df = pd.DataFrame({'date':data['created_at'].dt.date.unique()})
+# data['SA'] = data['text'].apply(analyze_sentiment)
 
 #Set up our routes and render our html
 @app.route('/')
@@ -44,13 +46,22 @@ def contact():
 def tradewar():
     return render_template('tradewar.html')
 
+@app.route('/pd')
+def displaydf():
+    data = pd.DataFrame(list(collection.find().limit(100)))
+    # data = data['created_at'].dt.date.value_counts().to_frame().sort_index(axis=0)
+    # # dates up to missing gap. do iloc[100:] for when it begins again
+    # data = data.iloc[:99]
+    return render_template('showdataframe.html',  tables=[data.to_html(classes='data')], titles=data.columns.values)
+
 @app.route('/displayline')
 def displayLineData():
+    sns.set_style("darkgrid")
     #Set up our data to display as a line using matplotlib
     img = io.BytesIO()
     # data = pd.DataFrame(list(collection.find()))
-    # df = pd.DataFrame({'date':data['created_at'].dt.date.unique()})
-    y_axis = data['created_at'].dt.date.value_counts()
+    dates = data['created_at'].dt.date.value_counts().sort_index(axis=0).iloc[:99]
+    datess = data['created_at'].dt.date.value_counts().sort_index(axis=0).iloc[100:]
 
     #Creating parameters for our line plot and labeling x and y axis
     fig, ax = plt.subplots()
@@ -60,9 +71,11 @@ def displayLineData():
     ax.set_ylabel('Number of tweets' , fontsize=15)
     ax.set_title('Number of Tweets Per Day with #tradewar', fontsize=15, fontweight='bold')
 
-    y_axis.plot(ax=ax, kind='line', color='red')
-    plt.setp(ax.get_xticklabels(), fontsize=8, family='sans-serif', rotation=45)
-    plt.setp(ax.get_yticklabels(), fontsize=10, family='sans-serif')
+    fig.autofmt_xdate()
+    dates.plot(ax=ax, kind='line', color='red')
+    datess.plot(ax=ax, kind='line', color='red')
+    # plt.setp(ax.get_xticklabels(), fontsize=8, family='sans-serif', rotation=45)
+    # plt.setp(ax.get_yticklabels(), fontsize=10, family='sans-serif')
 
     plt.savefig(img, format='png')
     img.seek(0)
@@ -73,6 +86,7 @@ def displayLineData():
 
 @app.route('/displayfill')
 def displayLineFill():
+    sns.set_style("darkgrid")
     #Set up our data to display as a line using matplotlib
     img = io.BytesIO()
     # data = pd.DataFrame(list(collection.find()))
@@ -100,47 +114,17 @@ def displayLineFill():
     fig, ax = plt.subplots()
     ax.fill_between(x_date, zero_line, ts_hist.values, facecolor='blue', alpha=0.5)
     # Format plot
-    plt.setp(ax.get_xticklabels(), fontsize=8, family='sans-serif', rotation=45)
-    plt.setp(ax.get_yticklabels(), fontsize=9, family='sans-serif')
+    # plt.setp(ax.get_xticklabels(), fontsize=8, family='sans-serif', rotation=45)
+    # plt.setp(ax.get_yticklabels(), fontsize=9, family='sans-serif')
     plt.xlabel('Date',fontsize=18)
     plt.ylabel('Number of Tweets',fontsize=18)
-
+    fig.autofmt_xdate()
     plt.savefig(img, format='png')
     img.seek(0)
     plot_url = base64.b64encode(img.getvalue()).decode()
 
     # return '<img src="data:image/png;base64,{}">'.format(plot_url)
     return render_template('displayfill.html', plot_url=plot_url)
-
-
-# @app.route('/sentanalysis')
-# def sentAnalysisDisplay():
-#     #fix naming convention
-#     # pos = sent_analysis()[0]
-#     # neu = sent_analysis()[1]
-#     # neg = sent_analysis()[2]
-#
-#     # this is probably slowing me down. calling on analyze sentiment for every tweet we have
-#     result = []
-#     for tweet in data['text']:
-#         result.append(analyze_sentiment(tweet))
-#     data['SA'] = result
-#     data['SA'] = data['text'].apply(lambda tweet: analyze_sentiment)
-#
-#     # data['SA'] = np.array([analyze_sentiment(tweet) for tweet in data['text'] ])
-#
-#     pos_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] > 0]
-#     neu_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] == 0]
-#     neg_tweets = [ tweet for index, tweet in enumerate(data['text']) if data['SA'][index] < 0]
-#
-#     pos = len(pos_tweets)* 100/ len(data['text'])
-#     neu = len(neu_tweets)* 100/ len(data['text'])
-#     neg = len(neg_tweets)* 100/ len(data['text'])
-#
-#     #call once instead of 3 times
-#     # pos, neu, neg = sent_analysis()
-#
-#     return render_template('sentanalysis.html', pos=pos, neu=neu, neg=neg)
 
 @app.route('/sentanalysis')
 def sentAnalysisDisplay():
@@ -150,17 +134,31 @@ def sentAnalysisDisplay():
     # neg = sent_analysis()[2]
 
     # this is probably slowing me down. calling on analyze sentiment for every tweet we have
-    data['SA'] = data['text'].apply(analyze_sentiment)
+
 
     n = data.shape[0]
-    pos_frac = (data['SA'] > 0).sum() * 100 / n
-    neu_frac = (data['SA'] == 0).sum() * 100 / n
-    neg_frac = (data['SA'] < 0).sum() * 100 / n
+    pos_frac = str(round((data['sentval'] > 0).sum() * 100 / n, 1))+'%'
+    neu_frac = str(round((data['sentval'] == 0).sum() * 100 / n, 1))+'%'
+    neg_frac = str(round((data['sentval'] < 0).sum() * 100 / n,  1))+'%'
 
     #call once instead of 3 times
     # pos, neu, neg = sent_analysis()
+    sns.set_style("darkgrid")
+    #Set up our data to display as a line using matplotlib
+    img = io.BytesIO()
+    fig, ax = plt.subplots()
+    data.groupby('created_at')['sentval'].sum().iloc[:99].plot(ax=ax, kind='line', color='red')
+    data.groupby('created_at')['sentval'].sum().iloc[100:].plot(ax=ax, kind='line', color='red')
 
-    return render_template('sentanalysis.html', pos=pos_frac, neu=neu_frac, neg=neg_frac)
+    plt.xlabel('Date',fontsize=18)
+    plt.ylabel('Sentiment Value Sum',fontsize=18)
+    fig.autofmt_xdate()
+
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plot_url = base64.b64encode(img.getvalue()).decode()
+
+    return render_template('sentanalysis.html', plot_url=plot_url, pos=pos_frac, neu=neu_frac, neg=neg_frac)
 
 
 

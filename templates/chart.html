@@ -11,19 +11,16 @@
     <script>
 
       var myChart;
-      var labelsArray = []
-      var seriesArray = []
       var getData = $.get('/data');
 
       getData.done(function(res) {
 
         var data = {
             // A labels array that can contain any sort of values
-            //change labels into array of dates, possible by months
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
+            labels: res[1].months,
             // Our series array that contains series objects or in this case series data arrays
             series: [
-              res.results
+              res[0].results
             ]
           };
 
