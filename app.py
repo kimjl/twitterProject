@@ -67,14 +67,15 @@ def displayLineData():
     fig, ax = plt.subplots()
     ax.tick_params(axis='x', labelsize=10)
     ax.tick_params(axis='y', labelsize=10)
-    ax.set_xlabel('Dates', fontsize=15)
+    ax.set_xlabel('Date', fontsize=15)
     ax.set_ylabel('Number of tweets' , fontsize=15)
     ax.set_title('Number of Tweets Per Day with #tradewar', fontsize=15, fontweight='bold')
 
     fig.autofmt_xdate()
+    plt.gcf().subplots_adjust(bottom=0.25)
     dates.plot(ax=ax, kind='line', color='red')
     datess.plot(ax=ax, kind='line', color='red')
-    # plt.setp(ax.get_xticklabels(), fontsize=8, family='sans-serif', rotation=45)
+    plt.setp(ax.get_xticklabels(), fontsize=10, family='sans-serif', rotation=45)
     # plt.setp(ax.get_yticklabels(), fontsize=10, family='sans-serif')
 
     plt.savefig(img, format='png')
