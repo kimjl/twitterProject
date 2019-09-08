@@ -5,7 +5,7 @@ import pymongo
 # Authentication Credentials
 consumer_key = 'consumer_key'
 consumer_secret = 'consumer_secret'
-access_token = '976553437570756612-access_token'
+access_token = 'access_token'
 access_token_secret = 'access_token_secret'
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
