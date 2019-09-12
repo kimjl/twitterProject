@@ -17,6 +17,7 @@ import timeit
 from random import sample
 from datetime import datetime
 from dateutil.parser import parse
+import seaborn as sns
 
 client = pymongo.MongoClient('localhost', 27017)
 db = client['tradetest']
@@ -38,32 +39,41 @@ app = Flask(__name__)
 
 @app.route("/pd")
 def home():
-    data = pd.DataFrame(list(collection.find().limit(50)))
-    data = data.drop('sentanalysis', axis=1)
-    data = data.drop('sentnum', axis=1)
-    data = data.drop('sentval', axis=1)
-    data['SA'] = data['text'].apply(analyze_sentiment)
-    return render_template('showdataframe.html',  tables=[data.to_html(classes='data')], titles=data.columns.values)
-
-@app.route('/display')
-def displayline():
     data = pd.DataFrame(list(collection.find()))
-    data['SA'] = data['text'].apply(analyze_sentiment)
+    df = pd.DataFrame({'date':data['created_at'].dt.date.unique()})
+    # data = data.drop('sentanalysis', axis=1)
+    # data = data.drop('sentnum', axis=1)
+    # data = data.drop('sentval', axis=1)
+    # data['SA'] = data['text'].apply(analyze_sentiment)
+    dates = data['created_at'].dt.date.value_counts().sort_index(axis=0).to_frame().iloc[:99]
+
+    return render_template('showdataframe.html',  tables=[dates.to_html(classes='data')], titles=dates.columns.values)
+
+@app.route('/displayline')
+def displayLineData():
+    sns.set_style("darkgrid")
     #Set up our data to display as a line using matplotlib
     img = io.BytesIO()
+    data = pd.DataFrame(list(collection.find()))
+
+    dates = data['created_at'].dt.date.value_counts().sort_index(axis=0).iloc[:99]
+    datess = data['created_at'].dt.date.value_counts().sort_index(axis=0).iloc[100:]
+
+    #Creating parameters for our line plot and labeling x and y axis
     fig, ax = plt.subplots()
-    data.groupby('created_at')['SA'].sum().plot(kind='line')
-    # y_axis = data['created_at'].dt.date.value_counts()
-    #
-    # #Creating parameters for our line plot and labeling x and y axis
-    # ax.tick_params(axis='x', labelsize=10)
-    # ax.tick_params(axis='y', labelsize=10)
-    # ax.set_xlabel('Dates', fontsize=15)
-    # ax.set_ylabel('Number of tweets' , fontsize=15)
-    # ax.set_title('Number of Tweets Per Day with #tradewar', fontsize=15, fontweight='bold')
-    #
-    # y_axis.plot(ax=ax, kind='line', color='red')
-    # plt.setp(ax.get_xticklabels(), fontsize=8, family='sans-serif', rotation=45)
+    ax.tick_params(axis='x', labelsize=10)
+    ax.tick_params(axis='y', labelsize=10)
+    ax.set_xlabel('Date', fontsize=15)
+    ax.set_ylabel('Number of tweets' , fontsize=15)
+    ax.set_title('Number of Tweets Per Day with #tradewar', fontsize=15, fontweight='bold')
+
+    fig.autofmt_xdate()
+    plt.gcf().subplots_adjust(bottom=0.25)
+    dates.plot(ax=ax, kind='line', color='red')
+    datess.plot(ax=ax, kind='line', color='red')
+    # ax.set_xlim(pd.Timestamp('2018-03-24'), pd.Timestamp('2019-08-14'))
+    # ax.set_xlim((pd.Timestamp('2018-03-24'), pd.Timestamp('2018-07-22')), (pd.Timestamp('2019-06-21'), pd.Timestamp('2019-08-14')))
+    plt.setp(ax.get_xticklabels(), fontsize=10, family='sans-serif', rotation=45)
     # plt.setp(ax.get_yticklabels(), fontsize=10, family='sans-serif')
 
     plt.savefig(img, format='png')

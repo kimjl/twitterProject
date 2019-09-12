@@ -48,10 +48,11 @@ def tradewar():
 
 @app.route('/pd')
 def displaydf():
-    data = pd.DataFrame(list(collection.find().limit(100)))
+    data = pd.DataFrame(list(collection.find(100)))
     # data = data['created_at'].dt.date.value_counts().to_frame().sort_index(axis=0)
     # # dates up to missing gap. do iloc[100:] for when it begins again
     # data = data.iloc[:99]
+    dates = data['created_at'].dt.date.value_counts().sort_index(axis=0).to_frame()
     return render_template('showdataframe.html',  tables=[data.to_html(classes='data')], titles=data.columns.values)
 
 @app.route('/displayline')

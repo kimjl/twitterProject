@@ -31,11 +31,13 @@ class CustomStreamListener(tweepy.StreamListener):
         self.db.Tweets.insert(data)
 
     def on_error(self, status_code):
-        print >> sys.stderr, 'Encountered error with status code:', status_code
+        # print >> sys.stderr, 'Encountered error with status code:', status_code
+        print('Encountered error with status code:', status_code, file=sys.stderr)
         return True # Don't kill the stream
 
     def on_timeout(self):
-        print >> sys.stderr, 'Timeout...'
+        # print >> sys.stderr, 'Timeout...'
+        print('Timeout...', file=sys.stderr)
         return True # Don't kill the stream
 
 sapi = tweepy.streaming.Stream(auth, CustomStreamListener(api))
