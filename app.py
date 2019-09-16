@@ -70,7 +70,7 @@ def displayLineData():
     ax.tick_params(axis='y', labelsize=10)
     ax.set_xlabel('Date', fontsize=15)
     ax.set_ylabel('Number of tweets' , fontsize=15)
-    ax.set_title('Number of Tweets Per Day with #tradewar', fontsize=15, fontweight='bold')
+    ax.set_title('Number of Tweets Per Month with #tradewar', fontsize=15, fontweight='bold')
 
     fig.autofmt_xdate()
     plt.gcf().subplots_adjust(bottom=0.25)
@@ -115,6 +115,7 @@ def displayLineFill():
 
     fig, ax = plt.subplots()
     ax.fill_between(x_date, zero_line, ts_hist.values, facecolor='blue', alpha=0.5)
+    ax.set_title('Number of Tweets Per Month with #tradewar', fontsize=15, fontweight='bold')
     # Format plot
     # plt.setp(ax.get_xticklabels(), fontsize=8, family='sans-serif', rotation=45)
     # plt.setp(ax.get_yticklabels(), fontsize=9, family='sans-serif')
@@ -154,6 +155,7 @@ def sentAnalysisDisplay():
 
     plt.xlabel('Date',fontsize=18)
     plt.ylabel('Sentiment Value Sum',fontsize=18)
+    ax.set_title('Sentiment Value Per Month', fontsize=15, fontweight='bold')
     fig.autofmt_xdate()
 
     plt.savefig(img, format='png')
