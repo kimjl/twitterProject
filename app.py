@@ -73,7 +73,7 @@ def displaydf():
 @app.route('/displayline')
 def displayLineData():
 
-    sns.set_style("darkgrid")
+    sns.set_style("whitegrid")
     img = io.BytesIO()
 
     dates = data['created_at'].dt.date.value_counts(
@@ -82,6 +82,7 @@ def displayLineData():
     ).sort_index(axis=0).iloc[100:]
 
     fig, ax = plt.subplots()
+    ax.patch.set_facecolor('#e3f2fd')
     ax.tick_params(axis='x', labelsize=10)
     ax.tick_params(axis='y', labelsize=10)
     ax.set_xlabel('Date', fontsize=15)
@@ -96,7 +97,7 @@ def displayLineData():
     plt.setp(ax.get_xticklabels(), fontsize=10,
              family='sans-serif', rotation=45)
 
-    plt.savefig(img, format='png')
+    plt.savefig(img, format='png', facecolor=ax.get_facecolor(), edgecolor='none')
     img.seek(0)
     plot_url = base64.b64encode(img.getvalue()).decode()
 
@@ -106,7 +107,7 @@ def displayLineData():
 @app.route('/displayfill')
 def displayLineFill():
 
-    sns.set_style("darkgrid")
+    sns.set_style("whitegrid")
     img = io.BytesIO()
 
     uniques = data.drop_duplicates('text')
@@ -129,15 +130,16 @@ def displayLineFill():
     zero_line = np.zeros(len(x_date))
 
     fig, ax = plt.subplots()
+    ax.patch.set_facecolor('#e3f2fd')
     ax.fill_between(x_date, zero_line, ts_hist.values,
-                    facecolor='blue', alpha=0.5)
+                    facecolor='red', alpha=0.5)
     ax.set_title('Number of Tweets Per Month with #tradewar',
                  fontsize=15, fontweight='bold')
 
-    plt.xlabel('Date', fontsize=18)
-    plt.ylabel('Number of Tweets', fontsize=18)
+    plt.xlabel('Date', fontsize=16)
+    plt.ylabel('Number of Tweets', fontsize=16)
     fig.autofmt_xdate()
-    plt.savefig(img, format='png')
+    plt.savefig(img, format='png', facecolor=ax.get_facecolor(), edgecolor='none')
     img.seek(0)
     plot_url = base64.b64encode(img.getvalue()).decode()
 
@@ -152,20 +154,21 @@ def sentAnalysisDisplay():
     neu_frac = str(round((data['sentval'] == 0).sum() * 100 / n, 1))+'%'
     neg_frac = str(round((data['sentval'] < 0).sum() * 100 / n,  1))+'%'
 
-    sns.set_style("darkgrid")
+    sns.set_style("whitegrid")
     img = io.BytesIO()
     fig, ax = plt.subplots()
+    ax.patch.set_facecolor('#e3f2fd')
     data.groupby('created_at')['sentval'].sum().iloc[:99].plot(
         ax=ax, kind='line', color='red')
     data.groupby('created_at')['sentval'].sum().iloc[100:].plot(
         ax=ax, kind='line', color='red')
 
-    plt.xlabel('Date', fontsize=18)
-    plt.ylabel('Sentiment Value Sum', fontsize=18)
+    plt.xlabel('Date', fontsize=16)
+    plt.ylabel('Sentiment Value Sum', fontsize=16)
     ax.set_title('Sentiment Value Per Month', fontsize=15, fontweight='bold')
     fig.autofmt_xdate()
 
-    plt.savefig(img, format='png')
+    plt.savefig(img, format='png', facecolor=ax.get_facecolor(), edgecolor='none')
     img.seek(0)
     plot_url = base64.b64encode(img.getvalue()).decode()
 
