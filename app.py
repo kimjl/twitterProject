@@ -136,8 +136,8 @@ def displayLineFill():
     ax.set_title('Number of Tweets Per Month with #tradewar',
                  fontsize=15, fontweight='bold')
 
-    plt.xlabel('Date', fontsize=16)
-    plt.ylabel('Number of Tweets', fontsize=16)
+    plt.xlabel('Date', fontsize=14)
+    plt.ylabel('Number of Tweets', fontsize=14)
     fig.autofmt_xdate()
     plt.savefig(img, format='png', facecolor=ax.get_facecolor(), edgecolor='none')
     img.seek(0)
